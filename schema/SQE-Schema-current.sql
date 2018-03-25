@@ -11,7 +11,7 @@
  Target Server Version : 100211
  File Encoding         : 65001
 
- Date: 27/02/2018 13:07:31
+ Date: 25/03/2018 18:24:17
 */
 
 SET NAMES utf8mb4;
@@ -41,7 +41,7 @@ CREATE TABLE `SQE_image` (
   CONSTRAINT `fk_image_to_catalog` FOREIGN KEY (`image_catalog_id`) REFERENCES `image_catalog` (`image_catalog_id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT `fk_image_to_edition` FOREIGN KEY (`edition_catalog_id`) REFERENCES `edition_catalog` (`edition_catalog_id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT `fk_image_to_url` FOREIGN KEY (`image_urls_id`) REFERENCES `image_urls` (`image_urls_id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=7374 DEFAULT CHARSET=utf8 COMMENT='This table defines an image.  It contains referencing data to access the image via iiif servers, it also stores metadata relating to the image itself, such as sizing, resolution, image color range, etc.  It also maintains a link to the institutional referencing system, and the referencing of the editio princeps (as provided by the imaging institution).';
+) ENGINE=InnoDB AUTO_INCREMENT=40002 DEFAULT CHARSET=utf8 COMMENT='This table defines an image.  It contains referencing data to access the image via iiif servers, it also stores metadata relating to the image itself, such as sizing, resolution, image color range, etc.  It also maintains a link to the institutional referencing system, and the referencing of the editio princeps (as provided by the imaging institution).';
 
 -- ----------------------------
 -- Table structure for SQE_image_to_edition_catalog
@@ -108,7 +108,7 @@ CREATE TABLE `artefact` (
   PRIMARY KEY (`artefact_id`,`sqe_image_id`),
   KEY `fk_artefact_to_image_idx` (`sqe_image_id`),
   CONSTRAINT `fk_artefact_to_image` FOREIGN KEY (`sqe_image_id`) REFERENCES `SQE_image` (`sqe_image_id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=3129 DEFAULT CHARSET=utf8 COMMENT='Every scroll combination is made up from artefacts.  The artefact is a polygon region of an image which the editor deems to constitute a coherent piece of material (different editors may come to different conclusions on what makes up an artefact).  This may correspond to what the editors of an editio princeps have designated a “fragment”, but often may not, since the columns and fragments in those publications are often made up of joins of various types.  Joined fragments should not, as a rule, be defined as a single artefact with the SQE system.  Rather, each component of a join should be a separate artefact, and those artefacts can then be positioned properly with each other via the artefact_position table.';
+) ENGINE=InnoDB AUTO_INCREMENT=4336 DEFAULT CHARSET=utf8 COMMENT='Every scroll combination is made up from artefacts.  The artefact is a polygon region of an image which the editor deems to constitute a coherent piece of material (different editors may come to different conclusions on what makes up an artefact).  This may correspond to what the editors of an editio princeps have designated a “fragment”, but often may not, since the columns and fragments in those publications are often made up of joins of various types.  Joined fragments should not, as a rule, be defined as a single artefact with the SQE system.  Rather, each component of a join should be a separate artefact, and those artefacts can then be positioned properly with each other via the artefact_position table.';
 
 -- ----------------------------
 -- Table structure for artefact_data
@@ -122,7 +122,7 @@ CREATE TABLE `artefact_data` (
   PRIMARY KEY (`artefact_data_id`),
   KEY `fk_artefact_data_to_artefact` (`artefact_id`),
   CONSTRAINT `fk_artefact_data_to_artefact` FOREIGN KEY (`artefact_id`) REFERENCES `artefact` (`artefact_id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=620 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=1827 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Table structure for artefact_data_owner
@@ -148,7 +148,7 @@ CREATE TABLE `artefact_owner` (
   KEY `fk_artefact_owner_to_scroll_version` (`scroll_version_id`),
   CONSTRAINT `fk_artefact_owner_to_artefact` FOREIGN KEY (`artefact_id`) REFERENCES `artefact` (`artefact_id`),
   CONSTRAINT `fk_artefact_owner_to_scroll_version` FOREIGN KEY (`scroll_version_id`) REFERENCES `scroll_version` (`scroll_version_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3129 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=4336 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Table structure for artefact_position
@@ -167,7 +167,7 @@ CREATE TABLE `artefact_position` (
   KEY `fk_artefact_position_to_sign_id` (`scroll_id`),
   CONSTRAINT `fk_artefact_position_to_artefact` FOREIGN KEY (`artefact_id`) REFERENCES `artefact` (`artefact_id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT `fk_artefact_position_to_sign_id` FOREIGN KEY (`scroll_id`) REFERENCES `sign` (`sign_id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=1425 DEFAULT CHARSET=utf8 COMMENT='This table defines the location and rotation of an artefact within the scroll.';
+) ENGINE=InnoDB AUTO_INCREMENT=3472 DEFAULT CHARSET=utf8 COMMENT='This table defines the location and rotation of an artefact within the scroll.';
 
 -- ----------------------------
 -- Table structure for artefact_position_owner
@@ -180,7 +180,7 @@ CREATE TABLE `artefact_position_owner` (
   KEY `fk_artefact_position_owner_to_scroll_version` (`scroll_version_id`),
   CONSTRAINT `fk_artefact_position_owner_to_artefact` FOREIGN KEY (`artefact_position_id`) REFERENCES `artefact_position` (`artefact_position_id`),
   CONSTRAINT `fk_artefact_position_owner_to_scroll_version` FOREIGN KEY (`scroll_version_id`) REFERENCES `scroll_version` (`scroll_version_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1425 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=2632 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Table structure for char_of_writing
@@ -307,9 +307,12 @@ CREATE TABLE `edition_catalog` (
   `edition_location_1` varchar(45) DEFAULT 'NULL' COMMENT 'Top level reference in the editio princeps (perhaps a column reference or fragment number).',
   `edition_location_2` varchar(45) DEFAULT 'NULL' COMMENT 'Sub reference designation in editio princeps.',
   `edition_side` tinyint(1) unsigned NOT NULL DEFAULT 0 COMMENT 'Side designation in editio princeps.',
+  `scroll_id` int(11) unsigned DEFAULT 0,
   PRIMARY KEY (`edition_catalog_id`),
-  UNIQUE KEY `unique_edition_entry` (`edition_location_1`,`edition_location_2`,`edition_name`,`edition_side`,`edition_volume`,`composition`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=34647 DEFAULT CHARSET=utf8 COMMENT='This table contains the IAA data for the editio princeps reference for all of their images.';
+  UNIQUE KEY `unique_edition_entry` (`edition_location_1`,`edition_location_2`,`edition_name`,`edition_side`,`edition_volume`,`composition`) USING BTREE,
+  KEY `fk_edition_catalog_to_scroll` (`scroll_id`),
+  CONSTRAINT `fk_edition_catalog_to_scroll` FOREIGN KEY (`scroll_id`) REFERENCES `scroll` (`scroll_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=34649 DEFAULT CHARSET=utf8 COMMENT='This table contains the IAA data for the editio princeps reference for all of their images.';
 
 -- ----------------------------
 -- Table structure for edition_catalog_to_discrete_reference
@@ -394,7 +397,7 @@ CREATE TABLE `image_catalog` (
   `catalog_side` tinyint(1) unsigned DEFAULT 0 COMMENT 'Side reference designation.',
   PRIMARY KEY (`image_catalog_id`),
   UNIQUE KEY `unique_catalog_entry` (`catalog_number_1`,`catalog_number_2`,`catalog_side`,`institution`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=34775 DEFAULT CHARSET=utf8 COMMENT='The referencing system of the institution providing the images.';
+) ENGINE=InnoDB AUTO_INCREMENT=34778 DEFAULT CHARSET=utf8 COMMENT='The referencing system of the institution providing the images.';
 
 -- ----------------------------
 -- Table structure for image_to_edition_catalog
@@ -662,7 +665,7 @@ DROP TABLE IF EXISTS `scroll`;
 CREATE TABLE `scroll` (
   `scroll_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   PRIMARY KEY (`scroll_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1106 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=5114 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Table structure for scroll_data
@@ -675,7 +678,7 @@ CREATE TABLE `scroll_data` (
   PRIMARY KEY (`scroll_data_id`),
   KEY `fk_scroll_to_master_scroll_idx` (`scroll_id`),
   CONSTRAINT `fk_scroll_to_master_scroll` FOREIGN KEY (`scroll_id`) REFERENCES `scroll` (`scroll_id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=1119 DEFAULT CHARSET=utf8 COMMENT='Description of a reconstructed scroll or combination.';
+) ENGINE=InnoDB AUTO_INCREMENT=1338 DEFAULT CHARSET=utf8 COMMENT='Description of a reconstructed scroll or combination.';
 
 -- ----------------------------
 -- Table structure for scroll_data_owner
@@ -733,8 +736,8 @@ CREATE TABLE `scroll_version` (
   UNIQUE KEY `user_scroll_version_idx` (`user_id`,`scroll_id`,`version`),
   KEY `fk_scroll_version_to_scroll_idx` (`scroll_id`),
   CONSTRAINT `fk_scroll_version_to_scroll` FOREIGN KEY (`scroll_id`) REFERENCES `scroll` (`scroll_id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
-  CONSTRAINT `fk_scroll_version_to_user` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=1234 DEFAULT CHARSET=utf8 COMMENT='This table defines unique versions of a reconstructed scroll.';
+  CONSTRAINT `fk_scroll_version_to_user` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1747 DEFAULT CHARSET=utf8 COMMENT='This table defines unique versions of a reconstructed scroll.';
 
 -- ----------------------------
 -- Table structure for sign
@@ -908,7 +911,7 @@ CREATE TABLE `user` (
   `registration_date` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   PRIMARY KEY (`user_id`),
   UNIQUE KEY `user` (`user_name`)
-) ENGINE=InnoDB AUTO_INCREMENT=28 DEFAULT CHARSET=utf8 COMMENT='This table stores the data of all registered users,\nCreated by Martin 17/03/03';
+) ENGINE=InnoDB AUTO_INCREMENT=29 DEFAULT CHARSET=utf8 COMMENT='This table stores the data of all registered users,\nCreated by Martin 17/03/03';
 
 -- ----------------------------
 -- Table structure for user_attribute
@@ -1526,6 +1529,38 @@ CREATE DEFINER=`root`@`localhost` FUNCTION `SPLIT_STRING`(x VARCHAR(255), delim 
 RETURN REPLACE(SUBSTRING(SUBSTRING_INDEX(x, delim, pos),
        LENGTH(SUBSTRING_INDEX(x, delim, pos -1)) + 1),
        delim, '');
+;;
+delimiter ;
+
+-- ----------------------------
+-- Procedure structure for update_comps
+-- ----------------------------
+DROP PROCEDURE IF EXISTS `update_comps`;
+delimiter ;;
+CREATE DEFINER=`root`@`%` PROCEDURE `update_comps`()
+BEGIN
+DECLARE comp VARCHAR(128);
+DECLARE done INT DEFAULT 0;
+DECLARE cur CURSOR FOR
+    SELECT DISTINCT composition
+    FROM edition_catalog
+    WHERE scroll_id = 0;
+DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = 1;
+OPEN cur;
+read_loop: LOOP
+ 
+    FETCH cur INTO comp;  
+    IF done THEN
+        LEAVE read_loop;  
+    END IF;
+ 
+    insert into scroll (scroll_id) values (null);
+    SET @scroll_id = LAST_INSERT_ID();
+    insert into scroll_data (name, scroll_id) values (comp, @scroll_id);
+ 
+END LOOP;
+CLOSE cur; 
+END;
 ;;
 delimiter ;
 
